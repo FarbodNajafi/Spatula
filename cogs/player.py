@@ -52,8 +52,7 @@ class Player(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
-    @commands.command(aliases=['stop'])
+    @commands.command(aliases=['stop', 'dc'])
     async def leave(self, ctx):
         await ctx.voice_client.disconnect()
 
@@ -65,13 +64,13 @@ class Player(commands.Cog):
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
         await ctx.send(f'Now playing: Konga')
 
-    @commands.command()
-    async def yt(self, ctx, *, url):
-        async with ctx.typing():
-            player = await YTDLSource.from_url(url, loop=self.bot.loop)
-            ctx.voice_client.play(player, after=lambda e: print('player error: %s' % e) if e else None)
-
-        await ctx.send(f'Now playing: {player.title}')
+    # @commands.command()
+    # async def yt(self, ctx, *, url):
+    #     async with ctx.typing():
+    #         player = await YTDLSource.from_url(url, loop=self.bot.loop)
+    #         ctx.voice_client.play(player, after=lambda e: print('player error: %s' % e) if e else None)
+    #
+    #     await ctx.send(f'Now playing: {player.title}')
 
     @commands.command()
     async def yts(self, ctx, *, url):
@@ -91,7 +90,7 @@ class Player(commands.Cog):
         await ctx.send("Changed volume to {}%".format(volume))
 
     @commands.command()
-    @yt.before_invoke
+    # @yt.before_invoke
     @yts.before_invoke
     @konga.before_invoke
     async def join(self, ctx):

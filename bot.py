@@ -43,8 +43,12 @@ async def rtt(ctx):
 
 
 token: str
-with open('secrets.json', 'r') as f:
-    _json_ = json.load(f)
-    token = _json_['token']
+try:
+    with open('secrets.json', 'r') as f:
+        _json_ = json.load(f)
+        token = _json_['token']
+
+except FileNotFoundError:
+    token = os.environ.get('DISCORD_TOKEN')
 
 bot.run(token)

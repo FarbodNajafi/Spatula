@@ -57,23 +57,7 @@ class Player(commands.Cog):
         await ctx.voice_client.disconnect()
 
     @commands.command()
-    async def konga(self, ctx):
-        await self.join(ctx)
-
-        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('media/konga.mp3'))
-        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-        await ctx.send(f'Now playing: Konga')
-
-    # @commands.command()
-    # async def yt(self, ctx, *, url):
-    #     async with ctx.typing():
-    #         player = await YTDLSource.from_url(url, loop=self.bot.loop)
-    #         ctx.voice_client.play(player, after=lambda e: print('player error: %s' % e) if e else None)
-    #
-    #     await ctx.send(f'Now playing: {player.title}')
-
-    @commands.command()
-    async def yts(self, ctx, *, url):
+    async def yt(self, ctx, *, url):
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
             ctx.voice_client.play(player, after=lambda e: print('player error: %s' % e) if e else None)
@@ -90,9 +74,7 @@ class Player(commands.Cog):
         await ctx.send("Changed volume to {}%".format(volume))
 
     @commands.command()
-    # @yt.before_invoke
-    @yts.before_invoke
-    @konga.before_invoke
+    @yt.before_invoke
     async def join(self, ctx):
         if ctx.voice_client is None:
             if ctx.author.voice:

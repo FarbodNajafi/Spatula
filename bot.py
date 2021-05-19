@@ -2,6 +2,7 @@ import json
 import os
 import sqlite3
 
+import aiohttp
 from discord.ext import commands
 
 
@@ -40,6 +41,19 @@ async def pong(ctx):
 @bot.command()
 async def rtt(ctx):
     await ctx.send(f'{bot.latency * 1000:.0f}ms')
+
+
+async def get_quote():
+    async with aiohttp.ClientSession() as session:
+        async with session.get('https://zenquotes.io/api/random/') as response:
+            data = await response.read()
+            quote = json.loads(data)
+            return quote[0]['q'] + ' -' + quote[0]['a']
+
+
+@bot.command()
+async def inspire(ctx):
+    await ctx.send(await get_quote())
 
 
 token: str

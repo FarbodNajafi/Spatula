@@ -32,7 +32,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
         super().__init__(source, volume)
 
         self.data = data
-
         self.title = data.get('title')
         self.url = data.get('url')
 
@@ -52,15 +51,23 @@ class Player(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['stop', 'dc'])
+    async def play(self, ctx, player):
+        ctx.voice_client.play(player, after=lambda e: print('player error: %s' % e) if e else None)
+
+    @commands.command(aliases=['stop',
+                               'dc',
+                               ])
     async def leave(self, ctx):
         await ctx.voice_client.disconnect()
 
-    @commands.command()
-    async def yt(self, ctx, *, url):
+    @commands.command(aliases=['yts',
+                               'play',
+                               'p',
+                               ])
+    async def yt(self, ctx, *, query):
         async with ctx.typing():
-            player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-            ctx.voice_client.play(player, after=lambda e: print('player error: %s' % e) if e else None)
+            player = await YTDLSource.from_url(query, loop=self.bot.loop, stream=True)
+            await self.play(ctx, player)
 
         await ctx.send(f'Now playing: {player.title}')
 
@@ -79,11 +86,20 @@ class Player(commands.Cog):
         if ctx.voice_client is None:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
+
             else:
                 await ctx.send("You're not connected to a voice channel.")
                 raise commands.CommandError('Author not connected to a voice channel.')
+
         elif ctx.voice_client.is_playing():
             ctx.voice_client.stop()
+
+    @yt.error
+    async def yt_error(self, ctx, error):
+        if isinstance(error, IndexError):
+            await ctx.send("Couldn't find the matching query. Change your query or try again.")
+        await ctx.send('An error occurred while playing the audio of the given query.')
+        print(error)
 
 
 def setup(bot):

@@ -5,6 +5,8 @@ import sqlite3
 import aiohttp
 from discord.ext import commands
 
+from utils.utils import get_prefix
+
 
 class ConnectSQLite:
     """Creates a Sqlite database connection"""
@@ -21,7 +23,7 @@ class ConnectSQLite:
             self.conn.close()
 
 
-bot = commands.Bot(command_prefix='>')
+bot = commands.Bot(command_prefix=get_prefix(), case_insensitive=True)
 
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
@@ -56,13 +58,5 @@ async def inspire(ctx):
     await ctx.send(await get_quote())
 
 
-token: str
-try:
-    with open('secrets.json', 'r') as f:
-        _json_ = json.load(f)
-        token = _json_['token']
-
-except FileNotFoundError:
-    token = os.environ.get('DISCORD_TOKEN')
-
+token = os.environ.get('DISCORD_TOKEN')
 bot.run(token)

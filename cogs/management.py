@@ -3,15 +3,20 @@ from itertools import cycle
 import discord
 from discord.ext import commands, tasks
 
+from utils.utils import BotModes, get_mode, get_prefix
+
 
 class Management(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._status = cycle([
             {'func': self.bot.change_presence, 'status': discord.Status.dnd,
-             'activity': discord.Activity(name='>ping', type=5)},
+             'activity': discord.Activity(name=f'{get_prefix()}ping', type=5)},
             {'func': self.bot.change_presence, 'status': discord.Status.idle,
-             'activity': discord.Activity(name='>help must do something...', type=2)},
+             'activity': discord.Activity(
+                 name=f'{get_prefix()}help must do something'
+                      f'{" evil" if get_mode() == BotModes.SHADOW.value else " new" if get_mode() == BotModes.DEV.value else ""}...',
+                 type=2)},
             {'func': self.bot.change_presence, 'status': discord.Status.online,
              'activity': discord.Activity(name='API Documents', type=3)}
         ])

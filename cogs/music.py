@@ -56,8 +56,8 @@ class Music(commands.Cog):
                 pass
 
         elif isinstance(error, InvalidVoiceChannel):
-            return await ctx.send('Error connecting to voice channel'
-                                  'Please make sure you are in a voice channel which is visible to me')
+            return await ctx.send(f'{ctx.author.mention}, Error connecting to voice channel'
+                                  'Please make sure you are in a voice channel which is visible to me', delete_after=20)
 
         print(f'Ignoring exception in command {ctx.command}', file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
@@ -79,7 +79,7 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send("I'm not connected to a voice channel", delete_after=20)
+            return await ctx.send(f"{ctx.author.mention}, I'm not connected to a voice channel", delete_after=20)
 
         await self.cleanup(ctx.guild)
 
@@ -94,7 +94,7 @@ class Music(commands.Cog):
         source = await youtube.YTDLSource.create_source(ctx, query, loop=self.bot.loop)
 
         await player.queue.put(source)
-        await ctx.send(f'{ctx.author.mention}, Enqueued: {source.title}') if player.queue.qsize() > 1 else None
+        await ctx.send(f'{ctx.author.mention}, Enqueued: {source.title}', delete_after=20)
 
     @commands.command(aliases=[
         'pa',
@@ -103,13 +103,13 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_playing():
-            return await ctx.send("I'm not playing anything right now!", delete_after=20)
+            return await ctx.send(f"{ctx.author.mention}, I'm not playing anything right now!", delete_after=20)
 
         elif vc.is_paused():
-            return await ctx.send('Player is paused', delete_after=20)
+            return await ctx.send(f'{ctx.author.mention}, Player is paused', delete_after=20)
 
         vc.pause()
-        await ctx.send(f'{ctx.author.mention}, player paused.')
+        await ctx.send(f'{ctx.author.mention}, player paused.', delete_after=20)
 
     @commands.command(aliases=[
         'res',
@@ -118,13 +118,13 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send("I'm not connected to a voice channel", delete_after=20)
+            return await ctx.send(f"{ctx.author.mention}, I'm not connected to a voice channel", delete_after=20)
 
         elif not vc.is_paused():
             return
 
         vc.resume()
-        await ctx.send(f'{ctx.author.mention}, player resumed.')
+        await ctx.send(f'{ctx.author.mention}, player resumed.', delete_after=20)
 
     @commands.command(aliases=[
         'sk',
@@ -133,7 +133,7 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send("I'm not connected to a voice channel", delete_after=20)
+            return await ctx.send(f"{ctx.author.mention}, I'm not connected to a voice channel", delete_after=20)
 
         elif vc.is_paused():
             pass
@@ -142,7 +142,7 @@ class Music(commands.Cog):
             return
 
         vc.stop()
-        await ctx.send(f'{ctx.author.mention}, skipped')
+        await ctx.send(f'{ctx.author.mention}, skipped', delete_after=20)
 
     @commands.command(aliases=[
         'q',
@@ -151,18 +151,18 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send("I'm not connected to a voice channel", delete_after=20)
+            return await ctx.send(f"{ctx.author.mention}, I'm not connected to a voice channel", delete_after=20)
 
         player = self.get_player(ctx)
         if player.queue.empty():
-            return await ctx.send('Queue is empty.')
+            return await ctx.send(f'{ctx.author.mention}, Queue is empty.', delete_after=20)
 
         upcoming = list(itertools.islice(player.queue._queue, 0, 5))
 
         fmt = '\n'.join(f'**{item["title"]}**' for item in upcoming)
-        embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)}', description=fmt)
+        embed = discord.Embed(title=f'{ctx.author.mention}, Upcoming - Next {len(upcoming)}', description=fmt)
 
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, delete_after=60)
 
     @commands.command(aliases=[
         'np',
@@ -174,11 +174,11 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send("I'm not connected to a voice channel", delete_after=20)
+            return await ctx.send(f"{ctx.author.mention}, I'm not connected to a voice channel", delete_after=20)
 
         player = self.get_player(ctx)
         if not player.current:
-            return await ctx.send("I'm not playing anything right now")
+            return await ctx.send(f"{ctx.author.mention}, I'm not playing anything right now", delete_after=20)
 
         try:
             await player.np.delete()
@@ -202,15 +202,15 @@ class Music(commands.Cog):
         vc = ctx.voice_client
 
         if not vc or not vc.is_connected():
-            return await ctx.send("I'm not connected to a voice channel", delete_after=20)
+            return await ctx.send(f"{ctx.author.mention}, I'm not connected to a voice channel", delete_after=20)
 
         if not 0 <= volume <= 100:
-            return await ctx.send('Please enter a value between 0 and 100.')
+            return await ctx.send(f'{ctx.author.mention}, Please enter a value between 0 and 100.', delete_after=20)
 
         player = self.get_player(ctx)
 
         player.volume = volume / 100
-        await ctx.send(f'{ctx.author.mention}, volume set to **{volume}%**')
+        await ctx.send(f'{ctx.author.mention}, volume set to **{volume}%**', delete_after=20)
 
     @commands.command(aliases=[
         'summon',
@@ -246,8 +246,12 @@ class Music(commands.Cog):
     @play.error
     async def play_error(self, ctx, error):
         if isinstance(error, IndexError):
-            await ctx.send("Couldn't find the matching query. Change your query or try again.")
-        await ctx.send('An error occurred while playing the audio of the given query.')
+            await ctx.send(f"{ctx.author.mention}, Couldn't find the matching query. Change your query or try again.",
+                           delete_after=20)
+            print(error)
+            return
+        await ctx.send(f'{ctx.author.mention}, An error occurred while playing the audio of the given query.',
+                       delete_after=20)
         print(error)
 
 

@@ -65,7 +65,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
     async def create_source(cls, ctx: commands.Context, query, *, loop: asyncio.BaseEventLoop = None):
         loop = loop or asyncio.get_event_loop()
 
-        data = await loop.run_in_executor(None, lambda: cls.ytdl.extract_info(query, download=True))
+        data = await loop.run_in_executor(None, lambda: cls.ytdl.extract_info(query, download=False))
 
         if not data:
             raise YTDLException("Couldn't find the youtube video matching the given query")
@@ -131,7 +131,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                         if key == 'entries':
                             video_url = val[selection - 1]['webpage_url']
                             data = await loop.run_in_executor(None,
-                                                              lambda: cls.ytdl.extract_info(video_url, download=True))
+                                                              lambda: cls.ytdl.extract_info(video_url, download=False))
                             return cls(ctx, discord.FFmpegPCMAudio(data['url'], **cls.FFMPEG_OPTIONS),
                                        data=data)
 

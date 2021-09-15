@@ -159,8 +159,8 @@ class Music(commands.Cog):
 
         upcoming = list(itertools.islice(player.queue._queue, 0, 5))
 
-        fmt = '\n'.join(f'**{item["title"]}**' for item in upcoming)
-        embed = discord.Embed(title=f'{ctx.author.mention}, Upcoming - Next {len(upcoming)}', description=fmt)
+        fmt = '\n'.join(f'**{i+1}.\t{upcoming[i]["title"]}**' for i in range(len(upcoming)))
+        embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)} Songs', description=f'{ctx.author.mention}:\n{fmt}')
 
         await ctx.send(embed=embed, delete_after=60)
 

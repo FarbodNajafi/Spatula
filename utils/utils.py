@@ -8,13 +8,11 @@ def get_mode():
 
 
 def get_prefix():
-    with open('prefixes.json', 'r') as f:
-        prefix = json.load(f)
-
-    return prefix[(get_mode())]
+    return os.environ.get('PREFIX')
 
 
 class BotModes(enum.Enum):
-    SHADOW = 'shadow_spatula'
     LIVE = 'spatula'
-    DEV = 'spatula_dev'
+    DEV = 'shadow_spatula'
+    NIGHTLY = 'spooky_urf'
+    FEATURE = 'spooky_gangplank'

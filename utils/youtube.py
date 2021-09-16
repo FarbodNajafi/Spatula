@@ -83,9 +83,10 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(ctx, discord.FFmpegPCMAudio(filename, **cls.FFMPEG_OPTIONS), data=data)
 
     @classmethod
-    async def search_source(cls, bot: commands.Bot, ctx: commands.Context, query: str, *,
+    async def search_source(cls, ctx: commands.Context, query: str, *,
                             loop: asyncio.BaseEventLoop = None):
         channel = ctx.channel
+        bot = ctx.bot
         loop = loop or asyncio.get_event_loop()
 
         data = await loop.run_in_executor(None, lambda: cls.ytdl.extract_info(f'ytsearch10:"{query}"', download=False))
@@ -118,7 +119,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
             message = await bot.wait_for('message',
                                          check=lambda msg: msg.content.isdigit() and msg.channel == channel
                                                            or msg.content == 'c' or msg.content == 'C'
-                                         , timeout=30)
+                                         , timeout=60)
 
         except asyncio.TimeoutError:
             return 'timeout'

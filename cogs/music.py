@@ -97,6 +97,19 @@ class Music(commands.Cog):
         await ctx.send(f'{ctx.author.mention}, Enqueued: {source.title}', delete_after=20)
 
     @commands.command(aliases=[
+        's'
+    ])
+    async def search(self, ctx, *, query):
+        player = self.get_player(ctx)
+
+        search_msg = await ctx.send(f'{ctx.author.mention}, searching...')
+        source = await youtube.YTDLSource.search_source(ctx, query, loop=self.bot.loop)
+        await search_msg.delete()
+
+        await player.queue.put(source)
+        await ctx.send(f'{ctx.author.mention}, Enqueued: {source.title}', delete_after=20)
+
+    @commands.command(aliases=[
         'pa',
     ])
     async def pause(self, ctx):
@@ -159,8 +172,9 @@ class Music(commands.Cog):
 
         upcoming = list(itertools.islice(player.queue._queue, 0, 5))
 
-        fmt = '\n'.join(f'**{i+1}.\t{upcoming[i]["title"]}**' for i in range(len(upcoming)))
-        embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)} Songs', description=f'{ctx.author.mention}:\n{fmt}')
+        fmt = '\n'.join(f'**{i + 1}.\t{upcoming[i]["title"]}**' for i in range(len(upcoming)))
+        embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)} Songs',
+                              description=f'{ctx.author.mention}:\n{fmt}')
 
         await ctx.send(embed=embed, delete_after=60)
 
@@ -216,6 +230,7 @@ class Music(commands.Cog):
         'summon',
     ])
     @play.before_invoke
+    @search.before_invoke
     async def join(self, ctx, *, channel: discord.VoiceChannel = None):
         if not channel:
             try:

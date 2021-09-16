@@ -113,7 +113,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         cls.search['description'] = '\n'.join(list_)
 
         em = discord.Embed.from_dict(cls.search)
-        await ctx.send(embed=em, delete_after=30)
+        await ctx.send(embed=em, delete_after=60)
 
         try:
             message = await bot.wait_for('message',

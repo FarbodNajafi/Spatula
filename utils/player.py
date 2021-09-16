@@ -37,15 +37,7 @@ class Player:
 
         while not self.bot.is_closed():
             self.next.clear()
-
-            try:
-#                 async with timeout(300):
-                source = await self.queue.get()
-
-            except asyncio.TimeoutError:
-                await self._channel.send('Bot disconnected due to inactivity', delete_after=20)
-#                 return self.destroy(self._guild)
-
+            source = await self.queue.get()
             source.volume = self.volume
             self.current = source
 

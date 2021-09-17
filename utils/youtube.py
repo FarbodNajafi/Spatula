@@ -87,6 +87,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                             loop: asyncio.BaseEventLoop = None):
         channel = ctx.channel
         bot = ctx.bot
+        author = ctx.author
         loop = loop or asyncio.get_event_loop()
 
         data = await loop.run_in_executor(None, lambda: cls.ytdl.extract_info(f'ytsearch10:"{query}"', download=False))
@@ -117,9 +118,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         try:
             message = await bot.wait_for('message',
-                                         check=lambda msg: msg.content.isdigit() and msg.channel == channel
-                                                           or msg.content == 'c' or msg.content == 'C'
-                                         , timeout=60)
+                                         check=lambda msg: msg.author == author and msg.channel == channel,
+                                         timeout=60)
 
         except asyncio.TimeoutError:
             return 'timeout'
@@ -138,12 +138,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
                 else:
                     return 'invalid_selection'
-
-            elif message.content == 'c' or message.content == 'C':
-                return 'canceled'
-
             else:
-                return 'invalid_selection'
+                return 'canceled'
 
     @staticmethod
     def parse_duration(duration: int):

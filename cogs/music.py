@@ -103,11 +103,18 @@ class Music(commands.Cog):
         player = self.get_player(ctx)
 
         search_msg = await ctx.send(f'{ctx.author.mention}, searching...')
-        source = await youtube.YTDLSource.search_source(ctx, query, loop=self.bot.loop)
-        await search_msg.delete()
 
-        await player.queue.put(source)
-        await ctx.send(f'{ctx.author.mention}, Enqueued: {source.title}', delete_after=20)
+        source = await youtube.YTDLSource.search_source(ctx, query, loop=self.bot.loop)
+        if not isinstance(source, str):
+
+            await search_msg.delete()
+
+            await player.queue.put(source)
+            await ctx.send(f'{ctx.author.mention}, Enqueued: {source.title}', delete_after=20)
+
+        else:
+            await search_msg.delete()
+            await ctx.send(f'{source}', delete_after=20)
 
     @commands.command(aliases=[
         'pa',

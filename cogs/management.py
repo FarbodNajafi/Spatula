@@ -15,7 +15,7 @@ class Management(commands.Cog):
             {'func': self.bot.change_presence, 'status': discord.Status.idle,
              'activity': discord.Activity(
                  name=f'{get_prefix()}help must do something'
-                      f'{" evil" if get_mode() == BotModes.DEV.value else " new" if get_mode() == BotModes.NIGHTLY.value else "spooky"}...',
+                      f'{" evil" if get_mode() == BotModes.DEV.value else " spooky" if get_mode() == BotModes.NIGHTLY.value else " new" if get_mode() == BotModes.FEATURE.value else ""}...',
                  type=2)},
             {'func': self.bot.change_presence, 'status': discord.Status.online,
              'activity': discord.Activity(name='API Documents', type=3)}

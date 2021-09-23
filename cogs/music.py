@@ -148,6 +148,8 @@ class Music(commands.Cog):
 
     @commands.command(aliases=[
         'sk',
+        'next',
+        'n',
     ])
     async def skip(self, ctx):
         vc = ctx.voice_client

@@ -177,7 +177,7 @@ class Music(commands.Cog):
         if player.queue.empty():
             return await ctx.send(f'{ctx.author.mention}, Queue is empty.', delete_after=20)
 
-        upcoming = list(itertools.islice(player.queue._queue, 0, 5))
+        upcoming = list(itertools.islice(player.queue._queue, 0, 15))
 
         fmt = '\n'.join(f'**{i + 1}.\t{upcoming[i]["title"]}**' for i in range(len(upcoming)))
         embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)} Songs',

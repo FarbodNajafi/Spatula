@@ -60,5 +60,10 @@ class Player:
     def shuffle(self):
         shuffle(self.queue._queue)
 
+    def remove(self, index: int):
+        item = self.queue._queue[index - 1]
+        del self.queue._queue[index - 1]
+        return item
+
     def destroy(self, guild, message=''):
         return self.bot.loop.create_task(self._cog.cleanup(guild, message))

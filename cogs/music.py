@@ -86,7 +86,6 @@ class Music(commands.Cog):
 
     @commands.command(aliases=[
         'p',
-        'play',
         'sing',
     ])
     async def play(self, ctx, *, query):
@@ -194,9 +193,21 @@ class Music(commands.Cog):
     ])
     async def shuffle(self, ctx):
         player = self.get_player(ctx)
-        await ctx.send(f"{ctx.author.mention}, Shuffling... new queue will be sent.", delete_after=20)
+        await ctx.send(f'{ctx.author.mention}, Shuffling... new queue will be sent.', delete_after=20)
         player.shuffle()
-        await self.queue(ctx)
+        return await self.queue(ctx)
+
+    @commands.command(aliases=[
+        'r',
+        'rm',
+    ])
+    async def remove(self, ctx, index):
+        player = self.get_player(ctx)
+        try:
+            item = player.remove(int(index))
+            return await ctx.send(f'**Removed**: `{item.title}`', delete_after=20)
+        except IndexError:
+            return await ctx.send(f'**Wrong index**. could not remove from the queue.', delete_after=20)
 
     @commands.command(aliases=[
         'np',

@@ -91,10 +91,17 @@ class Music(commands.Cog):
     async def play(self, ctx, *, query):
         player = self.get_player(ctx)
 
-        source = await youtube.YTDLSource.create_source(ctx, query, loop=self.bot.loop)
+        # sources = await youtube.YTDLSource.create_source(ctx, query, loop=self.bot.loop)
+        sources = [i async for i in youtube.YTDLSource.create_source(ctx, query, loop=self.bot.loop)]
 
-        await player.queue.put(source)
-        await ctx.send(f'{ctx.author.mention}, Enqueued: {source.title}', delete_after=20)
+        for source in sources:
+            await player.queue.put(source)
+
+        if len(sources) > 1:
+            return await ctx.send(f'{ctx.author.mention}, Playlist added: {sources[0]["data"]["playlist_title"]}',
+                                  delete_after=20)
+
+        return await ctx.send(f'{ctx.author.mention}, Enqueued: {sources[0].title}', delete_after=20)
 
     @commands.command(aliases=[
         's'

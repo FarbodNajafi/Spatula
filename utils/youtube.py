@@ -1,5 +1,5 @@
 import asyncio
-
+from urllib import parse
 import discord
 import youtube_dl
 from discord.ext import commands
@@ -16,7 +16,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
         'format': 'bestaudio/best',
         'outtmpl': './media/%(extractor)s-%(id)s-%(title)s.%(ext)s',
         'restrictfilenames': True,
-        'noplaylist': True,
         'nocheckcertificate': True,
         'ignoreerrors': False,
         'logtostderr': False,
@@ -67,20 +66,32 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         data = await loop.run_in_executor(None, lambda: cls.ytdl.extract_info(query, download=False))
 
+        query_params = dict(parse.parse_qs(parse.urlsplit(query).query))
+
+        filenames = []
         if not data:
             raise YTDLException("Couldn't find the youtube video matching the given query")
 
-        if 'entries' in data:
-            for entry in data['entries']:
-                if entry:
-                    data = entry
-                    break
+        if 'index' not in query_params:
+            if 'entries' in data:
+                for entry in data['entries']:
+                    if entry:
+                        filenames.append(entry)
+
+            elif 'url' in data:
+                filenames.append(data)
+
+        else:
+            filenames.append(data['entries'][
+                                 int(query_params['index'][0]) - 1
+                                 ])
 
         if not data:
             raise YTDLException("Couldn't find the youtube video matching the given query")
 
-        filename = data['url']
-        return cls(ctx, discord.FFmpegPCMAudio(filename, **cls.FFMPEG_OPTIONS), data=data)
+        for data in filenames:
+            filename = data['url']
+            yield cls(ctx, discord.FFmpegPCMAudio(filename, **cls.FFMPEG_OPTIONS), data=data)
 
     @classmethod
     async def search_source(cls, ctx: commands.Context, query: str, *,

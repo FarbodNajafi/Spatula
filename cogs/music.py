@@ -83,11 +83,11 @@ class Music(commands.Cog):
 
         await self.cleanup(ctx.guild)
 
-    @commands.command(aliases=['yts',
-                               'yt',
-                               'p',
-                               'sing'
-                               ])
+    @commands.command(aliases=[
+        'p',
+        'play',
+        'sing',
+    ])
     async def play(self, ctx, *, query):
         player = self.get_player(ctx)
 

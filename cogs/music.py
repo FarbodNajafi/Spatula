@@ -72,9 +72,10 @@ class Music(commands.Cog):
 
         return player
 
-    @commands.command(aliases=['stop',
-                               'dc',
-                               ])
+    @commands.command(aliases=[
+        'stop',
+        'dc',
+    ])
     async def leave(self, ctx):
         vc = ctx.voice_client
 

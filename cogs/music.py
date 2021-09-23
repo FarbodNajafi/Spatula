@@ -186,6 +186,16 @@ class Music(commands.Cog):
         await ctx.send(embed=embed, delete_after=60)
 
     @commands.command(aliases=[
+        'sh',
+        'random',
+    ])
+    async def shuffle(self, ctx):
+        player = self.get_player(ctx)
+        await ctx.send(f"{ctx.author.mention}, Shuffling... new queue will be sent.", delete_after=20)
+        player.shuffle()
+        await self.queue(ctx)
+
+    @commands.command(aliases=[
         'np',
         'current',
         'playing',

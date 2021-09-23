@@ -1,4 +1,5 @@
 import asyncio
+from random import shuffle
 
 import discord
 from async_timeout import timeout
@@ -55,6 +56,9 @@ class Player:
 
             except discord.HTTPException:
                 pass
+
+    def shuffle(self):
+        shuffle(self.queue._queue)
 
     def destroy(self, guild, message=''):
         return self.bot.loop.create_task(self._cog.cleanup(guild, message))

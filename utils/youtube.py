@@ -61,7 +61,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return self.title
 
     @classmethod
-    async def create_source(cls, ctx: commands.Context, query, *, loop: asyncio.BaseEventLoop = None):
+    async def extract_data(cls, ctx: commands.Context, query, *, loop: asyncio.BaseEventLoop = None):
         loop = loop or asyncio.get_event_loop()
 
         data = await loop.run_in_executor(None, lambda: cls.ytdl.extract_info(query, download=False))
@@ -91,7 +91,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         for data in filenames:
             filename = data['url']
-            yield cls(ctx, discord.FFmpegPCMAudio(filename, **cls.FFMPEG_OPTIONS), data=data)
+            yield data
 
     @classmethod
     async def search_source(cls, ctx: commands.Context, query: str, *,
@@ -144,8 +144,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                             video_url = val[selection - 1]['webpage_url']
                             data = await loop.run_in_executor(None,
                                                               lambda: cls.ytdl.extract_info(video_url, download=False))
-                            return cls(ctx, discord.FFmpegPCMAudio(data['url'], **cls.FFMPEG_OPTIONS),
-                                       data=data)
+                            return data
 
                 else:
                     return 'invalid_selection'

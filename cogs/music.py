@@ -92,16 +92,16 @@ class Music(commands.Cog):
         player = self.get_player(ctx)
 
         # sources = await youtube.YTDLSource.create_source(ctx, query, loop=self.bot.loop)
-        sources = [i async for i in youtube.YTDLSource.create_source(ctx, query, loop=self.bot.loop)]
+        sources = [i async for i in youtube.YTDLSource.extract_data(ctx, query, loop=self.bot.loop)]
 
-        for source in sources:
-            await player.queue.put(source)
+        for data in sources:
+            await player.queue.put(data)
 
         if len(sources) > 1:
             return await ctx.send(f'{ctx.author.mention}, Playlist added: {sources[0]["data"]["playlist_title"]}',
                                   delete_after=20)
 
-        return await ctx.send(f'{ctx.author.mention}, Enqueued: {sources[0].title}', delete_after=20)
+        return await ctx.send(f'{ctx.author.mention}, Enqueued: {sources[0]["title"]}', delete_after=20)
 
     @commands.command(aliases=[
         's'
@@ -111,17 +111,16 @@ class Music(commands.Cog):
 
         search_msg = await ctx.send(f'{ctx.author.mention}, searching...')
 
-        source = await youtube.YTDLSource.search_source(ctx, query, loop=self.bot.loop)
-        if not isinstance(source, str):
+        data = await youtube.YTDLSource.search_source(ctx, query, loop=self.bot.loop)
+        if not isinstance(data, str):
 
             await search_msg.delete()
 
-            await player.queue.put(source)
-            await ctx.send(f'{ctx.author.mention}, Enqueued: {source.title}', delete_after=20)
+            await player.queue.put(data)
+            await ctx.send(f'{ctx.author.mention}, Enqueued: {data["title"]}', delete_after=20)
 
         else:
             await search_msg.delete()
-            await ctx.send(f'{source}', delete_after=20)
 
     @commands.command(aliases=[
         'pa',
@@ -265,6 +264,27 @@ class Music(commands.Cog):
         await ctx.send(f'{ctx.author.mention}, volume set to **{volume}%**', delete_after=20)
 
     @commands.command(aliases=[
+        'lp1',
+        'loopone',
+        'loop1',
+        'repeat',
+    ])
+    async def loopthis(self, ctx):
+        player = self.get_player(ctx)
+        player.loop = 'this'
+
+        await ctx.send(f'{ctx.author.mention}, **Current** song will be repeated', delete_after=20)
+
+    @commands.command(aliases=[
+        'lp0',
+    ])
+    async def loopoff(self, ctx):
+        player = self.get_player(ctx)
+        player.loop = ''
+
+        await ctx.send(f'{ctx.author.mention}, Loop disabled', delete_after=20)
+
+    @commands.command(aliases=[
         'summon',
     ])
     @play.before_invoke
@@ -294,7 +314,9 @@ class Music(commands.Cog):
             except asyncio.TimeoutError:
                 raise VoiceConnectionError(f'Connecting to channel `{channel}` timed out.')
 
-        await ctx.send(f'Connected to **{channel}**', delete_after=20)
+        loop_mode = self.get_player(ctx).loop
+        await ctx.send(f'Connected to **{channel}**\n'
+                       f'loop mode: {loop_mode if loop_mode else "disabled"}', delete_after=20)
 
     @play.error
     async def play_error(self, ctx, error):

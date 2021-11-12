@@ -2,6 +2,7 @@ import asyncio
 import itertools
 import sys
 import traceback
+import uuid
 
 import discord
 from discord.ext import commands
@@ -94,7 +95,8 @@ class Music(commands.Cog):
         sources = [i async for i in youtube.YTDLSource.extract_data(ctx, query, loop=self.bot.loop)]
 
         for data in sources:
-            await player.queue.put(data)
+            id_ = uuid.uuid4().hex
+            await player.queue.put((id_, data))
 
         if len(sources) > 1:
             return await ctx.send(f'{ctx.author.mention}, Playlist added: {sources[0]["data"]["playlist_title"]}',
@@ -115,7 +117,9 @@ class Music(commands.Cog):
 
             await search_msg.delete()
 
-            await player.queue.put(data)
+            id_ = uuid.uuid4().hex
+            await player.queue.put((id_, data))
+
             await ctx.send(f'{ctx.author.mention}, Enqueued: {data["title"]}', delete_after=20)
 
         else:
@@ -186,7 +190,7 @@ class Music(commands.Cog):
 
         upcoming = list(itertools.islice(player.queue._queue, 0, 15))
 
-        fmt = '\n'.join(f'**{i + 1}.\t{upcoming[i]["title"]}**' for i in range(len(upcoming)))
+        fmt = '\n'.join(f'**{i + 1}.\t{upcoming[i][1]["title"]}**' for i in range(len(upcoming)))
         embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)} Songs',
                               description=f'{ctx.author.mention}:\n{fmt}')
 
@@ -273,6 +277,19 @@ class Music(commands.Cog):
         player.loop = 'this'
 
         await ctx.send(f'{ctx.author.mention}, **Current** song will be repeated', delete_after=20)
+
+    @commands.command(aliases=[
+        'lp',
+        'lpq',
+        'loopall',
+        'repeatall',
+        'loopqueue',
+    ])
+    async def loop(self, ctx):
+        player = self.get_player(ctx)
+        player.loop = 'queue'
+
+        await ctx.send(f'{ctx.author.mention}, **Queue** will be looped', delete_after=20)
 
     @commands.command(aliases=[
         'lp0',

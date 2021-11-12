@@ -1,4 +1,6 @@
 import asyncio
+from collections import OrderedDict
+from itertools import cycle
 from random import shuffle
 
 import discord
@@ -19,7 +21,8 @@ class Player:
         'current',
         'np',
         'volume',
-        'prev',
+        'history',
+        'iter',
         'loop',
     )
 
@@ -36,7 +39,7 @@ class Player:
         self.np = None
         self.volume = 1.0
         self.current = None
-        self.prev = []
+        self.history = OrderedDict()
         self.loop = ''
 
         ctx.bot.loop.create_task(self.player_loop())
@@ -46,9 +49,30 @@ class Player:
 
         while not self.bot.is_closed():
             self.next.clear()
-            extracted_data = self.prev[0] if (self.loop and len(self.prev) > 0) else await self.queue.get()
 
-            source = self.create_source(extracted_data)
+            if not self.queue.empty():
+                extracted_data = next(reversed(self.history)) if (
+                        self.loop == 'this' and len(self.history) > 0) else await self.queue.get()
+
+            else:
+                if self.loop == 'this':
+                    try:
+                        extracted_data = next(reversed(self.history.items()))
+
+                    except StopIteration as _:
+                        extracted_data = await self.queue.get()
+
+                elif self.loop == 'queue':
+                    for k, v in self.history.items():
+                        await self.queue.put((k, v))
+
+                    self.history.clear()
+                    extracted_data = await self.queue.get()
+
+                else:
+                    extracted_data = await self.queue.get()
+
+            source = self.create_source(extracted_data[1])
             source.volume = self.volume
             self.current = source
 
@@ -59,7 +83,7 @@ class Player:
             await self.next.wait()
 
             source.cleanup()
-            self.prev.append(extracted_data)
+            self.history.update({extracted_data[0]: extracted_data[1]})
             self.current = None
 
             try:

@@ -91,7 +91,6 @@ class Music(commands.Cog):
     async def play(self, ctx, *, query):
         player = self.get_player(ctx)
 
-        # sources = await youtube.YTDLSource.create_source(ctx, query, loop=self.bot.loop)
         sources = [i async for i in youtube.YTDLSource.extract_data(ctx, query, loop=self.bot.loop)]
 
         for data in sources:

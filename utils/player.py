@@ -76,9 +76,6 @@ class Player:
     def shuffle(self):
         shuffle(self.queue._queue)
 
-    def repeat(self, source):
-        self._guild.voice_client.play(source, after=lambda _: self.repeat(source))
-
     def remove(self, index: int):
         item = self.queue._queue[index - 1]
         del self.queue._queue[index - 1]

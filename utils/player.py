@@ -1,10 +1,10 @@
 import asyncio
 from collections import OrderedDict
-from itertools import cycle
 from random import shuffle
 
 import discord
-from async_timeout import timeout
+import youtube_dl
+from discord import ClientException
 
 from utils import youtube
 
@@ -104,6 +104,16 @@ class Player:
         item = self.queue._queue[index - 1]
         del self.queue._queue[index - 1]
         return item
+
+    def clear_history(self):
+        self.history = OrderedDict()
+
+    def clear_queue(self):
+        self.queue = asyncio.Queue()
+
+    def clear(self):
+        self.clear_history()
+        self.clear_queue()
 
     def destroy(self, guild, message=''):
         return self.bot.loop.create_task(self._cog.cleanup(guild, message))

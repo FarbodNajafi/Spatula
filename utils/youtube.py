@@ -61,7 +61,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return self.title
 
     @classmethod
-    async def extract_data(cls, ctx: commands.Context, query, *, loop: asyncio.BaseEventLoop = None):
+    async def extract_data(cls, query, *, loop: asyncio.BaseEventLoop = None):
         loop = loop or asyncio.get_event_loop()
 
         data = await loop.run_in_executor(None, lambda: cls.ytdl.extract_info(query, download=False))
@@ -90,7 +90,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
             raise YTDLException("Couldn't find the youtube video matching the given query")
 
         for data in filenames:
-            filename = data['url']
             yield data
 
     @classmethod

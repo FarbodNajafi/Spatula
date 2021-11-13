@@ -92,14 +92,14 @@ class Music(commands.Cog):
     async def play(self, ctx, *, query):
         player = self.get_player(ctx)
 
-        sources = [i async for i in youtube.YTDLSource.extract_data(ctx, query, loop=self.bot.loop)]
+        sources = [i async for i in youtube.YTDLSource.extract_data(query, loop=self.bot.loop)]
 
         for data in sources:
             id_ = uuid.uuid4().hex
             await player.queue.put((id_, data))
 
         if len(sources) > 1:
-            return await ctx.send(f'{ctx.author.mention}, Playlist added: {sources[0]["data"]["playlist_title"]}',
+            return await ctx.send(f'{ctx.author.mention}, Playlist added: {sources[0]["playlist_title"]}',
                                   delete_after=20)
 
         return await ctx.send(f'{ctx.author.mention}, Enqueued: {sources[0]["title"]}', delete_after=20)
@@ -195,6 +195,30 @@ class Music(commands.Cog):
                               description=f'{ctx.author.mention}:\n{fmt}')
 
         await ctx.send(embed=embed, delete_after=60)
+
+    @commands.command(aliases=[
+        'clh',
+    ])
+    async def clearhistory(self, ctx):
+        player = self.get_player(ctx)
+        player.clear_history()
+        await ctx.send(f'{ctx.author.mention}, History cleared', delete_after=20)
+
+    @commands.command(aliases=[
+        'clq',
+    ])
+    async def clearqueue(self, ctx):
+        player = self.get_player(ctx)
+        player.clear_queue()
+        await ctx.send(f'{ctx.author.mention}, Queue cleared', delete_after=20)
+
+    @commands.command(aliases=[
+        'cl'
+    ])
+    async def clear(self, ctx):
+        player = self.get_player(ctx)
+        player.clear()
+        await ctx.send(f'{ctx.author.mention}, History and queue cleared', delete_after=20)
 
     @commands.command(aliases=[
         'sh',
@@ -306,6 +330,8 @@ class Music(commands.Cog):
     @play.before_invoke
     @search.before_invoke
     async def join(self, ctx, *, channel: discord.VoiceChannel = None):
+
+
         if not channel:
             try:
                 channel = ctx.author.voice.channel
@@ -333,6 +359,12 @@ class Music(commands.Cog):
         loop_mode = self.get_player(ctx).loop
         await ctx.send(f'Connected to **{channel}**\n'
                        f'loop mode: {loop_mode if loop_mode else "disabled"}', delete_after=20)
+
+    @commands.command
+    @join.before_invoke
+    async def refresh(self, ctx):
+        youtube.YTDLSource.ytdl.cache.remove()
+        await ctx.send(f'{ctx.author.mention}, Cache removed', delete_after=20)
 
     @play.error
     async def play_error(self, ctx, error):

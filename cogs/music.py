@@ -360,7 +360,9 @@ class Music(commands.Cog):
         await ctx.send(f'Connected to **{channel}**\n'
                        f'loop mode: {loop_mode if loop_mode else "disabled"}', delete_after=20)
 
-    @commands.command
+    @commands.command(aliases=[
+        'f5',
+    ])
     @join.before_invoke
     async def refresh(self, ctx):
         youtube.YTDLSource.ytdl.cache.remove()

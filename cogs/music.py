@@ -90,6 +90,7 @@ class Music(commands.Cog):
         'sing',
     ])
     async def play(self, ctx, *, query):
+        youtube.YTDLSource.ytdl.cache.remove()
         player = self.get_player(ctx)
 
         sources = [i async for i in youtube.YTDLSource.extract_data(query, loop=self.bot.loop)]
@@ -325,12 +326,18 @@ class Music(commands.Cog):
         await ctx.send(f'{ctx.author.mention}, Loop disabled', delete_after=20)
 
     @commands.command(aliases=[
+        'f5',
+    ])
+    async def refresh(self, ctx):
+        youtube.YTDLSource.ytdl.cache.remove()
+        await ctx.send(f'{ctx.author.mention}, Cache removed', delete_after=20)
+
+    @commands.command(aliases=[
         'summon',
     ])
     @play.before_invoke
     @search.before_invoke
     async def join(self, ctx, *, channel: discord.VoiceChannel = None):
-
 
         if not channel:
             try:
@@ -359,14 +366,6 @@ class Music(commands.Cog):
         loop_mode = self.get_player(ctx).loop
         await ctx.send(f'Connected to **{channel}**\n'
                        f'loop mode: {loop_mode if loop_mode else "disabled"}', delete_after=20)
-
-    @commands.command(aliases=[
-        'f5',
-    ])
-    @join.before_invoke
-    async def refresh(self, ctx):
-        youtube.YTDLSource.ytdl.cache.remove()
-        await ctx.send(f'{ctx.author.mention}, Cache removed', delete_after=20)
 
     @play.error
     async def play_error(self, ctx, error):

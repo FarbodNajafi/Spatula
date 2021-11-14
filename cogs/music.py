@@ -109,6 +109,7 @@ class Music(commands.Cog):
         's'
     ])
     async def search(self, ctx, *, query):
+        youtube.YTDLSource.ytdl.cache.remove()
         player = self.get_player(ctx)
 
         search_msg = await ctx.send(f'{ctx.author.mention}, searching...')

@@ -3,8 +3,6 @@ from collections import OrderedDict
 from random import shuffle
 
 import discord
-import youtube_dl
-from discord import ClientException
 
 from utils import youtube
 
@@ -50,27 +48,23 @@ class Player:
         while not self.bot.is_closed():
             self.next.clear()
 
-            if not self.queue.empty():
-                extracted_data = next(reversed(self.history)) if (
-                        self.loop == 'this' and len(self.history) > 0) else await self.queue.get()
+            if self.loop == 'this':
+                try:
+                    extracted_data = next(reversed(self.history.items()))
 
-            else:
-                if self.loop == 'this':
-                    try:
-                        extracted_data = next(reversed(self.history.items()))
-
-                    except StopIteration as _:
-                        extracted_data = await self.queue.get()
-
-                elif self.loop == 'queue':
-                    for k, v in self.history.items():
-                        await self.queue.put((k, v))
-
-                    self.history.clear()
+                except StopIteration as _:
                     extracted_data = await self.queue.get()
+
+            elif self.loop == 'queue':
+                for k, v in self.history.items():
+                    await self.queue.put((k, v))
+                    self.history.clear()
 
                 else:
                     extracted_data = await self.queue.get()
+
+            else:
+                extracted_data = await self.queue.get()
 
             source = self.create_source(extracted_data[1])
             source.volume = self.volume

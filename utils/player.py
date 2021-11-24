@@ -48,17 +48,22 @@ class Player:
         while not self.bot.is_closed():
             self.next.clear()
 
-            if self.loop == 'this':
-                try:
-                    extracted_data = next(reversed(self.history.items()))
+            if not self.current:
 
-                except StopIteration as _:
-                    extracted_data = await self.queue.get()
+                if self.loop == 'this':
+                    try:
+                        extracted_data = next(reversed(self.history.items()))
 
-            elif self.loop == 'queue':
-                for k, v in self.history.items():
-                    await self.queue.put((k, v))
-                    self.history.clear()
+                    except StopIteration as _:
+                        extracted_data = await self.queue.get()
+
+                elif self.loop == 'queue':
+                    for k, v in self.history.items():
+                        await self.queue.put((k, v))
+                        self.history.clear()
+
+                    else:
+                        extracted_data = await self.queue.get()
 
                 else:
                     extracted_data = await self.queue.get()

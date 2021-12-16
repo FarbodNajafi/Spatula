@@ -1,10 +1,12 @@
 import asyncio
 from urllib import parse
+
 import discord
-import youtube_dl
+import yt_dlp
+
 from discord.ext import commands
 
-youtube_dl.utils.bug_reports_message = lambda: ''
+yt_dlp.utils.bug_reports_message = lambda: ''
 
 
 class YTDLException(Exception):
@@ -30,7 +32,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         'options': '-vn',
     }
 
-    ytdl = youtube_dl.YoutubeDL(YTDL_OPTIONS)
+    ytdl = yt_dlp.YoutubeDL(YTDL_OPTIONS)
 
     def __init__(self, ctx: commands.Context, source: discord.FFmpegPCMAudio, *, data, volume=1.0):
         super().__init__(source, volume)

@@ -15,4 +15,4 @@ PyNaCl==1.4.0
 six==1.15.0
 typing-extensions==3.7.4.3
 yarl==1.6.3
-youtube-dl==2021.06.06
+yt-dlp
